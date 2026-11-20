@@ -131,26 +131,38 @@ class EnlistView(ui.View):
 
     @ui.button(label="Enlist / Apply", style=discord.ButtonStyle.green, custom_id="enlist_button")
     async def enlist_button(self, interaction: discord.Interaction, button: ui.Button):
-        tokens = load_tokens()
-        user_id = str(interaction.user.id)
+        try:
+            tokens = load_tokens()
+            user_id = str(interaction.user.id)
 
-        if user_id not in tokens:
-            encoded_redirect = urllib.parse.quote(REDIRECT_URI, safe="")
-            oauth_url = (
-                f"https://discord.com{CLIENT_ID}"
-                f"&response_type=code&redirect_uri={encoded_redirect}&scope=identify%20guilds"
-            )
-            view = ui.View()
-            view.add_item(ui.Button(label="1. Verify Servers (Required)", url=oauth_url))
-            await interaction.response.send_message(
-                "**Step 1:** Click the button below to authorize server verification.\n"
-                "**Step 2:** Once verified, click **Enlist / Apply** again to fill out your application!",
-                view=view,
-                ephemeral=True
-            )
-            return
+            if user_id not in tokens:
+                if not CLIENT_ID or not RENDER_URL:
+                    await interaction.response.send_message(
+                        "Bot setup error: CLIENT_ID or RENDER_URL is missing in Render Environment Variables.",
+                        ephemeral=True
+                    )
+                    return
 
-        await interaction.response.send_modal(ApplicationModal())
+                encoded_redirect = urllib.parse.quote(REDIRECT_URI, safe="")
+                oauth_url = (
+                    f"https://discord.com{CLIENT_ID}"
+                    f"&response_type=code&redirect_uri={encoded_redirect}&scope=identify%20guilds"
+                )
+                view = ui.View()
+                view.add_item(ui.Button(label="1. Verify Servers (Required)", url=oauth_url))
+                await interaction.response.send_message(
+                    "**Step 1:** Click the button below to authorize server verification.\n"
+                    "**Step 2:** Once verified, click **Enlist / Apply** again to fill out your application!",
+                    view=view,
+                    ephemeral=True
+                )
+                return
+
+            await interaction.response.send_modal(ApplicationModal())
+        except Exception as e:
+            print(f"Enlist button error: {e}")
+            if not interaction.response.is_done():
+                await interaction.response.send_message(f"Error: {e}", ephemeral=True)
 
 
 class ApplicationModal(ui.Modal, title="Server Enlistment Application"):
@@ -263,8 +275,7 @@ async def enlist_command(interaction: discord.Interaction):
         description="Click the button below to verify and fill out an application to join the server.",
         color=discord.Color.green()
     )
-    await interaction.channel.send(embed=embed, view=EnlistView())
-    await interaction.response.send_message("Enlistment panel posted!", ephemeral=True)
+    await interaction.response.send_message(embed=embed, view=EnlistView())
 
 
 @tasks.loop(hours=24)

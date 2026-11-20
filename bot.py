@@ -145,9 +145,13 @@ class EnlistView(ui.View):
 
                 encoded_redirect = urllib.parse.quote(REDIRECT_URI, safe="")
                 oauth_url = (
-                    f"https://discord.com{CLIENT_ID}"
-                    f"&response_type=code&redirect_uri={encoded_redirect}&scope=identify%20guilds"
+                    "https://discord.com"
+                    f"?client_id={CLIENT_ID}"
+                    "&response_type=code"
+                    f"&redirect_uri={encoded_redirect}"
+                    "&scope=identify%20guilds"
                 )
+
                 view = ui.View()
                 view.add_item(ui.Button(label="1. Verify Servers (Required)", url=oauth_url))
                 await interaction.response.send_message(

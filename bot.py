@@ -8,10 +8,10 @@ import discord
 from discord.ext import commands, tasks
 from discord import ui, app_commands
 
-TOKEN = os.environ.get("TOKEN")
-CLIENT_ID = os.environ.get("CLIENT_ID")
-CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
-RENDER_URL = os.environ.get("RENDER_URL", "").rstrip("/")
+TOKEN = os.environ.get("TOKEN", "").strip()
+CLIENT_ID = os.environ.get("CLIENT_ID", "").strip()
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET", "").strip()
+RENDER_URL = os.environ.get("RENDER_URL", "").strip().rstrip("/")
 
 STAFF_ROLE_ID = int(os.environ.get("STAFF_ROLE_ID", 0))
 APPROVED_ROLE_ID = int(os.environ.get("APPROVED_ROLE_ID", 0))
@@ -162,7 +162,11 @@ class EnlistView(ui.View):
         except Exception as e:
             print(f"Enlist button error: {e}")
             if not interaction.response.is_done():
-                await interaction.response.send_message(f"Error: {e}", ephemeral=True)
+                await interaction.response.send_message(
+                    f"Error: {e}\nBuilt URL: `{locals().get('oauth_url', 'None')}`",
+                    ephemeral=True
+                )
+
 
 
 class ApplicationModal(ui.Modal, title="Server Enlistment Application"):

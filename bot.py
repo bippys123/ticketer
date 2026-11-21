@@ -18,7 +18,7 @@ APPROVED_ROLE_ID = int(os.environ.get("APPROVED_ROLE_ID", 0))
 APPLICATIONS_CATEGORY_ID = int(os.environ.get("APPLICATIONS_CATEGORY_ID", 0))
 SERVER_LOGS_CHANNEL_ID = int(os.environ.get("SERVER_LOGS_CHANNEL_ID", 0))
 
-REDIRECT_URI = "https://" + "ticketer-qtev" + "://"
+REDIRECT_URI = "https://" + "ticketer-qtev" + ".onrender.com" + "/callback"
 TOKENS_FILE = "user_tokens.json"
 
 

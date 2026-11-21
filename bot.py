@@ -36,18 +36,18 @@ def save_user_token(user_id: str, data: dict):
         json.dump(tokens, f, indent=2)
 
 
-async def fetch_user_guilds(access_token: str) -> list[str] | None:
+async def fetch_user_guilds(access_token: str) -> tuple[list[str], str]:
     if not access_token:
-        return None
+        return [], "No access token saved"
     headers = {"Authorization": f"Bearer {access_token}"}
     api_guilds = "https://discord.com" + "/api/v10" + "/users/@me/guilds"
     async with aiohttp.ClientSession() as session:
         async with session.get(api_guilds, headers=headers) as resp:
-            print(f"Fetch guilds status: {resp.status}")
             if resp.status == 200:
                 guilds = await resp.json()
-                return [g["name"] for g in guilds]
-    return None
+                return [g["name"] for g in guilds], "OK"
+            err_text = await resp.text()
+            return [], f"HTTP {resp.status}: {err_text[:150]}"
 
 
 async def handle_home(request):
@@ -220,10 +220,13 @@ class ApplicationModal(ui.Modal, title="Server Enlistment Application"):
 
         tokens = load_tokens()
         user_data = tokens.get(str(interaction.user.id), {})
-        guilds_list = await fetch_user_guilds(user_data.get("access_token", "")) or user_data.get("guilds", [])
-        servers_text = ", ".join(guilds_list) if guilds_list else "None found"
+        guilds_list, status_msg = await fetch_user_guilds(user_data.get("access_token", ""))
+        if not guilds_list:
+            guilds_list = user_data.get("guilds", [])
+        servers_text = ", ".join(guilds_list) if guilds_list else f"None ({status_msg})"
         if len(servers_text) > 1000:
             servers_text = servers_text[:995] + "..."
+
 
         embed = discord.Embed(
             title=f"New Application: {interaction.user.display_name}",
@@ -306,14 +309,16 @@ async def daily_server_check():
     if not tokens:
         return
 
-    report_lines = []
+    report_lines = []    
+    
     for user_id, info in tokens.items():
-        guilds = await fetch_user_guilds(info.get("access_token", ""))
-        if guilds is not None:
+        guilds, _ = await fetch_user_guilds(info.get("access_token", ""))
+        if guilds:
             info["guilds"] = guilds
             save_user_token(user_id, info)
         else:
             guilds = info.get("guilds", [])
+
 
         report_lines.append(f"- **{info.get('username', user_id)}** (`{user_id}`): {', '.join(guilds) if guilds else 'None'}")
 

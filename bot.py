@@ -150,12 +150,11 @@ class EnlistView(ui.View):
                 view = ui.View()
                 view.add_item(ui.Button(label="1. Verify Servers (Required)", url=oauth_url))
                 await interaction.response.send_message(
-                    "**Step 1:** Click the button below to authorize server verification.\n"
-                    "**Step 2:** Once verified, click **Enlist / Apply** again to fill out your application!",
-                    f"Debug URI: `{REDIRECT_URI}`",
+                    f"**Step 1:** Click below to verify.\nDebug URI: `{REDIRECT_URI}`",
                     view=view,
                     ephemeral=True
                 )
+
                 return
 
             await interaction.response.send_modal(ApplicationModal())

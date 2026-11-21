@@ -165,10 +165,10 @@ class EnlistView(ui.View):
 
 
 class ApplicationModal(ui.Modal, title="Server Enlistment Application"):
-    ign = ui.TextInput(label="1. In-Game Name / Username", placeholder="Enter your username...", required=True)
-    age = ui.TextInput(label="2. Age", placeholder="e.g., 21", max_length=3, required=True)
-    timezone = ui.TextInput(label="3. Timezone / Region", placeholder="e.g., PST, EST, GMT+1", max_length=30, required=True)
-    referral = ui.TextInput(label="4. How did you find this server?", placeholder="e.g., Friend, Disboard...", max_length=100, required=True)
+    ign = ui.TextInput(label="1. What is your GeoFs acid?", placeholder="Enter your GeoFS acid. If you don't have one, make an account and copy the ID.", required=True)
+    age = ui.TextInput(label="2. Have you been trained in GMRP before? And if yes, by who/which force?", placeholder="Yes, VKS.", max_length=3, required=True)
+    timezone = ui.TextInput(label="3. What are your prior experiences in GMRP including when you started?", placeholder="UTC+0", max_length=30, required=True)
+    referral = ui.TextInput(label="4. What forces are you in and what rank are you in them?", placeholder="VKS, Senior Sergent", max_length=100, required=True)
     reason = ui.TextInput(
         label="5. Why do you want to join?",
         style=discord.TextStyle.paragraph,
@@ -210,12 +210,11 @@ class ApplicationModal(ui.Modal, title="Server Enlistment Application"):
             description=f"**Applicant:** {interaction.user.mention} (`{interaction.user.id}`)",
             color=discord.Color.blue()
         )
-        embed.add_field(name="1. In-Game Name", value=self.ign.value, inline=True)
-        embed.add_field(name="2. Age", value=self.age.value, inline=True)
-        embed.add_field(name="3. Timezone / Region", value=self.timezone.value, inline=True)
-        embed.add_field(name="4. How They Found Us", value=self.referral.value, inline=False)
-        embed.add_field(name="5. Reason for Joining", value=self.reason.value, inline=False)
-        embed.add_field(name=f"All Servers User Is In ({len(guilds_list)})", value=servers_text, inline=False)
+        embed.add_field(name="1. Question 1 Title", value=self.ign.value, inline=True)
+        embed.add_field(name="2. Question 2 Title", value=self.age.value, inline=True)
+        embed.add_field(name="3. Question 3 Title", value=self.timezone.value, inline=True)
+        embed.add_field(name="4. Question 4 Title", value=self.referral.value, inline=False)
+        embed.add_field(name="5. Question 5 Title", value=self.reason.value, inline=False)
 
         await app_channel.send(content=f"{staff_role.mention}", embed=embed, view=ReviewView())
         await interaction.response.send_message(

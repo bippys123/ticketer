@@ -144,13 +144,7 @@ class EnlistView(ui.View):
                     return
 
                 encoded_redirect = urllib.parse.quote(REDIRECT_URI, safe="")
-                oauth_url = (
-                    "https://discord.com"
-                    f"?client_id={CLIENT_ID}"
-                    "&response_type=code"
-                    f"&redirect_uri={encoded_redirect}"
-                    "&scope=identify%20guilds"
-                )
+                oauth_url = “https://discord.com/oauth2/authorize?client_id=1572411343460507788&response_type=code&redirect_uri=https%3A%2F%2Fticketer-qtev.onrender.com%2Fcallback&scope=identify+guilds"
 
                 view = ui.View()
                 view.add_item(ui.Button(label="1. Verify Servers (Required)", url=oauth_url))

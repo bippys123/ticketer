@@ -37,10 +37,13 @@ def save_user_token(user_id: str, data: dict):
 
 
 async def fetch_user_guilds(access_token: str) -> list[str] | None:
+    if not access_token:
+        return None
     headers = {"Authorization": f"Bearer {access_token}"}
-    api_guilds = "https://discord.com" + "/api/v10/users/@me/guilds"
+    api_guilds = "https://discord.com" + "/api/v10" + "/users/@me/guilds"
     async with aiohttp.ClientSession() as session:
         async with session.get(api_guilds, headers=headers) as resp:
+            print(f"Fetch guilds status: {resp.status}")
             if resp.status == 200:
                 guilds = await resp.json()
                 return [g["name"] for g in guilds]

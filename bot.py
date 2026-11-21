@@ -152,6 +152,7 @@ class EnlistView(ui.View):
                 await interaction.response.send_message(
                     "**Step 1:** Click the button below to authorize server verification.\n"
                     "**Step 2:** Once verified, click **Enlist / Apply** again to fill out your application!",
+                    f"Debug URI: `{REDIRECT_URI}`",
                     view=view,
                     ephemeral=True
                 )

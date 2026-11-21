@@ -263,16 +263,25 @@ class ReviewView(ui.View):
         member = interaction.guild.get_member(applicant_id)
         approved_role = interaction.guild.get_role(APPROVED_ROLE_ID)
 
-        if member and approved_role:
-            await member.add_roles(approved_role)
-            try:
-                await member.send(f"Congratulations! Your application to **{interaction.guild.name}** has been **approved**.")
-            except discord.Forbidden:
-                pass
+        # Create a 1-use invite link pointing to your server's default rules/system channel (or first text channel)
+        target_channel = interaction.guild.system_channel or interaction.guild.text_channels[0]
+        invite = await target_channel.create_invite(max_age=86400, max_uses=1, unique=True)
 
-        await interaction.response.send_message(f"Application **admitted** by {interaction.user.mention}. Closing channel in 5 seconds...")
+        if member:
+            if approved_role:
+                await member.add_roles(approved_role)
+            try:
+                await member.send(
+                    f"🎉 Congratulations! Your application to **{interaction.guild.name}** has been **approved**!\n"
+                    f"Here is your personal 1-use invite link (valid for 24 hours): {invite.url}"
+                )
+            except discord.Forbidden:
+                pass  # User has DMs disabled
+
+        await interaction.response.send_message(f"✅ Application **admitted** by {interaction.user.mention}. Closing channel in 5 seconds...")
         await asyncio.sleep(5)
         await interaction.channel.delete()
+
 
     @ui.button(label="Deny", style=discord.ButtonStyle.danger, custom_id="deny_app")
     async def deny_button(self, interaction: discord.Interaction, button: ui.Button):

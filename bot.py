@@ -128,6 +128,7 @@ class Bot(commands.Bot):
 
 
 bot = Bot()
+
 class EnlistView(ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -147,14 +148,13 @@ class EnlistView(ui.View):
                 })
                 oauth_url = "https://discord.com" + "/oauth2/authorize?" + params
 
-                view = ui.View()
-                view.add_item(ui.Button(label="1. Verify Servers (Required)", url=oauth_url))
+                view = StepTwoView(oauth_url)
                 await interaction.response.send_message(
-                    f"**Step 1:** Click below to verify.\nDebug URI: `{REDIRECT_URI}`",
+                    "**Step 1:** Click **1. Verify Servers** below and authorize in your browser.\n"
+                    "**Step 2:** Come back here and click **2. Fill Out Application**.",
                     view=view,
                     ephemeral=True
                 )
-
                 return
 
             await interaction.response.send_modal(ApplicationModal())
@@ -162,6 +162,25 @@ class EnlistView(ui.View):
             print(f"Enlist button error: {e}")
             if not interaction.response.is_done():
                 await interaction.response.send_message(f"Error: {e}", ephemeral=True)
+
+
+class StepTwoView(ui.View):
+    def __init__(self, oauth_url: str):
+        super().__init__(timeout=300)
+        self.add_item(ui.Button(label="1. Verify Servers", url=oauth_url))
+
+    @ui.button(label="2. Fill Out Application", style=discord.ButtonStyle.green)
+    async def open_app_button(self, interaction: discord.Interaction, button: ui.Button):
+        tokens = load_tokens()
+        if str(interaction.user.id) not in tokens:
+            await interaction.response.send_message(
+                "⚠️ You haven't completed **Step 1** yet! Click **1. Verify Servers** first, then click this button again.",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.send_modal(ApplicationModal())
+
 
 
 class ApplicationModal(ui.Modal, title="Server Enlistment Application"):

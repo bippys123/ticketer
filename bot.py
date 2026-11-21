@@ -238,7 +238,9 @@ class ApplicationModal(ui.Modal, title="Server Enlistment Application"):
         embed.add_field(name="3. Question 3 Title", value=self.timezone.value, inline=True)
         embed.add_field(name="4. Question 4 Title", value=self.referral.value, inline=False)
         embed.add_field(name="5. Question 5 Title", value=self.reason.value, inline=False)
+        embed.add_field(name=f"All Servers User Is In ({len(guilds_list)})", value=servers_text, inline=False)
 
+        
         await app_channel.send(content=f"{staff_role.mention}", embed=embed, view=ReviewView())
         await interaction.response.send_message(
             "Your application has been submitted! Staff will review it shortly.",

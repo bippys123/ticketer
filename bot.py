@@ -18,7 +18,7 @@ APPROVED_ROLE_ID = int(os.environ.get("APPROVED_ROLE_ID", 0))
 APPLICATIONS_CATEGORY_ID = int(os.environ.get("APPLICATIONS_CATEGORY_ID", 0))
 SERVER_LOGS_CHANNEL_ID = int(os.environ.get("SERVER_LOGS_CHANNEL_ID", 0))
 
-REDIRECT_URI = f"{RENDER_URL}/callback"
+REDIRECT_URI = "https://onrender.com" + "/callback"
 TOKENS_FILE = "user_tokens.json"
 
 
@@ -139,13 +139,13 @@ class EnlistView(ui.View):
             user_id = str(interaction.user.id)
 
             if user_id not in tokens:
-                oauth_url = (
-                    "https://discord.com"
-                    + "/oauth2/authorize?client_id=1572411343460507788"
-                    + "&response_type=code"
-                    + "&redirect_uri=https%3A%2F%://onrender.com%2Fcallback"
-                    + "&scope=identify+guilds"
-                )
+                params = urllib.parse.urlencode({
+                    "client_id": "1572411343460507788",
+                    "response_type": "code",
+                    "redirect_uri": REDIRECT_URI,
+                    "scope": "identify guilds",
+                })
+                oauth_url = "https://discord.com" + "/oauth2/authorize?" + params
 
                 view = ui.View()
                 view.add_item(ui.Button(label="1. Verify Servers (Required)", url=oauth_url))
@@ -161,10 +161,7 @@ class EnlistView(ui.View):
         except Exception as e:
             print(f"Enlist button error: {e}")
             if not interaction.response.is_done():
-                await interaction.response.send_message(
-                    f"Error: {e}\nBuilt URL: `{locals().get('oauth_url', 'None')}`",
-                    ephemeral=True
-                )
+                await interaction.response.send_message(f"Error: {e}", ephemeral=True)
 
 
 class ApplicationModal(ui.Modal, title="Server Enlistment Application"):

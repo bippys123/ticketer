@@ -162,14 +162,13 @@ class EnlistView(ui.View):
             print(f"Enlist button error: {e}")
             if not interaction.response.is_done():
                 await interaction.response.send_message(f"Error: {e}", ephemeral=True)
-
-
+                
 class StepTwoView(ui.View):
     def __init__(self, oauth_url: str):
         super().__init__(timeout=300)
-        self.add_item(ui.Button(label="1. Verify Servers", url=oauth_url))
+        self.add_item(ui.Button(label="1. Verify Servers", url=oauth_url, row=0))
 
-    @ui.button(label="2. Fill Out Application", style=discord.ButtonStyle.green)
+    @ui.button(label="2. Fill Out Application", style=discord.ButtonStyle.green, row=1)
     async def open_app_button(self, interaction: discord.Interaction, button: ui.Button):
         tokens = load_tokens()
         if str(interaction.user.id) not in tokens:
@@ -180,7 +179,6 @@ class StepTwoView(ui.View):
             return
 
         await interaction.response.send_modal(ApplicationModal())
-
 
 
 class ApplicationModal(ui.Modal, title="Server Enlistment Application"):

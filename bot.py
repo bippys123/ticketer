@@ -165,7 +165,7 @@ class EnlistView(ui.View):
 
 
 class ApplicationModal(ui.Modal, title="Server Enlistment Application"):
-    ign = ui.TextInput(label="1. What is your GeoFs acid?", placeholder="Enter your GeoFS acid. If you don't have one, make an account and copy the ID.", required=True)
+    ign = ui.TextInput(label="1. What is your GeoFs acid?", placeholder="Enter your GeoFS acid. If you don't have one, make one.", required=True)
     age = ui.TextInput(label="2. Have you been trained in GMRP before?", placeholder="If yes, please list which force you are in.", max_length=30, required=True)
     timezone = ui.TextInput(label="3. What are your prior experiences in GMRP?", placeholder="Include when you started.", max_length=30, required=True)
     referral = ui.TextInput(label="4. What forces are you in?", placeholder="If you are in a force, please state what role you are.", max_length=100, required=True)

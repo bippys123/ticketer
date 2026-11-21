@@ -38,8 +38,9 @@ def save_user_token(user_id: str, data: dict):
 
 async def fetch_user_guilds(access_token: str) -> list[str] | None:
     headers = {"Authorization": f"Bearer {access_token}"}
+    api_guilds = "https://discord.com" + "/api/v10/users/@me/guilds"
     async with aiohttp.ClientSession() as session:
-        async with session.get("https://discord.com", headers=headers) as resp:
+        async with session.get(api_guilds, headers=headers) as resp:
             if resp.status == 200:
                 guilds = await resp.json()
                 return [g["name"] for g in guilds]
@@ -63,9 +64,11 @@ async def handle_callback(request):
         "redirect_uri": REDIRECT_URI,
     }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    api_token = "https://discord.com" + "/api/v10/oauth2/token"
+    api_me = "https://discord.com" + "/api/v10/users/@me"
 
     async with aiohttp.ClientSession() as session:
-        async with session.post("https://discord.com", data=data, headers=headers) as resp:
+        async with session.post(api_token, data=data, headers=headers) as resp:
             token_json = await resp.json()
             if resp.status != 200:
                 return web.Response(text=f"OAuth2 Error: {token_json}", status=400)
@@ -74,7 +77,7 @@ async def handle_callback(request):
         refresh_token = token_json.get("refresh_token")
 
         auth_headers = {"Authorization": f"Bearer {access_token}"}
-        async with session.get("https://discord.com", headers=auth_headers) as user_resp:
+        async with session.get(api_me, headers=auth_headers) as user_resp:
             user_json = await user_resp.json()
             user_id = str(user_json["id"])
             username = user_json["username"]
@@ -136,15 +139,13 @@ class EnlistView(ui.View):
             user_id = str(interaction.user.id)
 
             if user_id not in tokens:
-                if not CLIENT_ID or not RENDER_URL:
-                    await interaction.response.send_message(
-                        "Bot setup error: CLIENT_ID or RENDER_URL is missing in Render Environment Variables.",
-                        ephemeral=True
-                    )
-                    return
-
-                encoded_redirect = urllib.parse.quote(REDIRECT_URI, safe="")
-                oauth_url = “https://discord.com/oauth2/authorize?client_id=1572411343460507788&response_type=code&redirect_uri=https%3A%2F%2Fticketer-qtev.onrender.com%2Fcallback&scope=identify+guilds"
+                oauth_url = (
+                    "https://discord.com"
+                    + "/oauth2/authorize?client_id=1572411343460507788"
+                    + "&response_type=code"
+                    + "&redirect_uri=https%3A%2F%://onrender.com%2Fcallback"
+                    + "&scope=identify+guilds"
+                )
 
                 view = ui.View()
                 view.add_item(ui.Button(label="1. Verify Servers (Required)", url=oauth_url))
@@ -164,7 +165,6 @@ class EnlistView(ui.View):
                     f"Error: {e}\nBuilt URL: `{locals().get('oauth_url', 'None')}`",
                     ephemeral=True
                 )
-
 
 
 class ApplicationModal(ui.Modal, title="Server Enlistment Application"):

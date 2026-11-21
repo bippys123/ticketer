@@ -230,7 +230,7 @@ class ReviewView(ui.View):
 
     def get_applicant_id(self, channel: discord.TextChannel) -> int | None:
         if channel.topic and "Applicant ID:" in channel.topic:
-            return int(channel.topic.split("Applicant ID:").strip())
+            return int(channel.topic.split("Applicant ID:")[1].strip())
         return None
 
     @ui.button(label="Admit", style=discord.ButtonStyle.success, custom_id="admit_app")

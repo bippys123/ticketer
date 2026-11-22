@@ -120,6 +120,7 @@ class Bot(commands.Bot):
 
     async def setup_hook(self):
         self.add_view(EnlistView())
+        self.add_view(StepTwoView())
         self.add_view(ReviewView())
         await self.tree.sync()
         await start_web_server()
@@ -167,21 +168,26 @@ class EnlistView(ui.View):
                 await interaction.response.send_message(f"Error: {e}", ephemeral=True)
                 
 class StepTwoView(ui.View):
-    def __init__(self, oauth_url: str):
-        super().__init__(timeout=300)
+    def __init__(self, oauth_url: str = "https://discord.com"):
+        super().__init__(timeout=None)
         self.add_item(ui.Button(label="1. Verify Servers", url=oauth_url, row=0))
 
-    @ui.button(label="2. Fill Out Application", style=discord.ButtonStyle.green, row=1)
+    @ui.button(label="2. Fill Out Application", style=discord.ButtonStyle.green, custom_id="step_two_apply", row=1)
     async def open_app_button(self, interaction: discord.Interaction, button: ui.Button):
-        tokens = load_tokens()
-        if str(interaction.user.id) not in tokens:
-            await interaction.response.send_message(
-                "⚠️ You haven't completed **Step 1** yet! Click **1. Verify Servers** first, then click this button again.",
-                ephemeral=True
-            )
-            return
+        try:
+            tokens = load_tokens()
+            if str(interaction.user.id) not in tokens:
+                await interaction.response.send_message(
+                    "⚠️ Please click **1. Verify Servers** first (or click **Enlist / Apply** again to get a fresh verification link).",
+                    ephemeral=True
+                )
+                return
 
-        await interaction.response.send_modal(ApplicationModal())
+            await interaction.response.send_modal(ApplicationModal())
+        except Exception as e:
+            print(f"Step 2 error: {e}")
+            if not interaction.response.is_done():
+                await interaction.response.send_message(f"Error opening form: `{e}`", ephemeral=True)
 
 
 class ApplicationModal(ui.Modal, title="Server Enlistment Application"):
